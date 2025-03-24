@@ -1,6 +1,6 @@
 <?php
 
-include_once "config/db.php";
+require_once __DIR__ . '/../../config/db.php';
 
 header("Content-type: application/json; charset=utf-8");
 
@@ -27,15 +27,20 @@ try {
 function getTotalAchievementsEarnedPerGame($conn){
     $sql = "
     SELECT 
-        g.id,
-        g.title,
-        COUNT(pa.achievementId) AS total_achievements_earned
-    FROM game g
-    JOIN achievement a ON a.gameId = g.id
-    JOIN player_achievement pa ON pa.achievementId = a.achievementId
-    GROUP BY g.id, g.title;
+        g.id AS gameId,
+        g.title AS gameTitle,
+        COUNT(pa.achievementId) AS totalAchievementsEarned
+    FROM player_achievement pa
+    JOIN game_achievement ga ON ga.achievementId = pa.achievementId
+    JOIN game g ON g.id = ga.gameId
+    GROUP BY g.id, g.title
+    ORDER BY totalAchievementsEarned DESC;
     ";
     $result = $conn->query($sql);
-    $rows = $conn->fetchAll(MYSQLI_ASSOC);
-    echo json_encode($rows);
+    if ($result->num_rows > 0) {
+        $rows = $conn->fetchAll(MYSQLI_ASSOC);
+        echo json_encode($rows);
+        return;
+     }
+    echo json_encode([]);
 }

@@ -1,6 +1,6 @@
 <?php
 
-include_once "config/db.php";
+require_once __DIR__ . '/../../config/db.php';
 
 header("Content-type: application/json; charset=utf-8");
 
@@ -20,9 +20,9 @@ try {
             }
             if ($type == "total") {
                 $id = $segments[4];
-                getPlayTimePerWeekGroupByPlayer($id);
+                getPlayTimePerWeekGroupByPlayer($conn, $id);
             } else if ($type == "average") {
-                getAveragePlayTimePerPlayer();
+                getAveragePlayTimePerPlayer($conn);
             }
             break;
         default:
@@ -34,29 +34,28 @@ try {
     http_response_code($e->getCode());
     echo $e->getMessage();
 }
-function getPlayTimePerWeekGroupByPlayer($id = null)
+function getPlayTimePerWeekGroupByPlayer($conn, $id = null)
 {
     if ($id == null) {
         $sql = "
         SELECT JSON_ARRAYAGG(
             JSON_OBJECT(
                 'player_id', p.id,
-                'week', YEARWEEK(s.date, 1),
-                'duration', SUM(s.duration)
+                'week', YEARWEEK(s.startedAt, 1),
+                'duration', SUM(TIMESTAMPDIFF(MINUTE, s.startedAt, s.endedAt))
             )
         ) AS playtime_per_week
         FROM session s
         JOIN player p ON p.id = s.playerId
-        GROUP BY p.id, YEARWEEK(s.date, 1);
+        GROUP BY p.id, YEARWEEK(s.startedAt, 1);
         ";
         $result = $conn->query($sql);
-        if (!$result) {
-            http_response_code(500);
-            echo json_encode(["status" => "error", 'error' => 'Database error']);
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            echo json_encode($row);
+            return;
         }
-
-        $row = $result->fetch_assoc();
-        echo json_encode($row);
+        echo json_encode([]);
         return;
     }
     $sql = "
@@ -64,7 +63,7 @@ function getPlayTimePerWeekGroupByPlayer($id = null)
                 JSON_OBJECT(
                     'player_id', p.id,
                     'week', YEARWEEK(s.date, 1),
-                    'duration', SUM(s.duration)
+                    'duration', SUM(TIMESTAMPDIFF(MINUTE, s.startedAt, s.endedAt))
                 )
             ) AS playtime_per_week
             FROM session s
@@ -72,24 +71,23 @@ function getPlayTimePerWeekGroupByPlayer($id = null)
             WHERE p.id = $id
             GROUP BY p.id, YEARWEEK(s.date, 1);
         ";
-    $stmt = $conn->prepare($sql);
-    if (!$stmt) {
-        throw new Exception($conn->error);
+    $result = $conn->query($sql);
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        echo json_encode($row);
+        return;
     }
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $row = $result->fetch_assoc();
-    echo json_encode($row);
+    echo json_encode([]);
 }
 
-function getAveragePlayTimePerPlayer(){
+function getAveragePlayTimePerPlayer($conn){
     $sql = "
-    SELECT 
+    SELECT
       JSON_OBJECT(
         'player_id', playerId,
-        'average_playtime', AVG(duration)
+        'average_playtime', AVG(TIMESTAMPDIFF(MINUTE, startedAt, endedAt))
       ) AS player_avg
-    FROM session s
+    FROM session
     GROUP BY playerId;
     ";
     $result = $conn->query($sql);

@@ -1,6 +1,6 @@
 <?php
 
-include_once "config/db.php";
+require_once __DIR__ . '/../config/db.php';
 
 header("Content-type: application/json; charset=utf-8");
 
@@ -40,15 +40,15 @@ function getPlayer($conn, $id)
     $sql = "
     SELECT *
     FROM player
-    WHERE id = $id
+    WHERE id = $id 
     ";
-    $stmt = $conn->prepare($sql);
-    if (!$stmt) {
-        throw new Exception($conn->error);
-    }
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $result = $conn->query($sql);
     $row = $result->fetch_assoc();
+    if (!$row) {
+        http_response_code(404);
+        echo json_encode(["error" => "Player not found"]);
+        return;
+    }
     echo json_encode($row);
 }
 
@@ -57,10 +57,8 @@ function getPlayers($conn, $params)
     $where = [];
     $join = "";
     if (isset($params['type'])) {
-        if ($params['type'] == "free") {
-            $join = "JOIN free_player f ON f.playerId = player.id";
-        } else if ($params['type'] == "premium") {
-            $join = "JOIN premium_player p ON p.playerId = player.id";
+        if ($params['type'] == "premium") {
+            $join = "JOIN premium_player p ON p.id = player.id";
         }
     }
 
@@ -70,7 +68,7 @@ function getPlayers($conn, $params)
         }
         $start = $params['start'];
         $end = $params['end'];
-        $where[] = "player.registrationDate BETWEEN $start AND $end";
+        $where[] = "player.joinedOn BETWEEN $start AND $end";
     }
 
     if (isset($params['ageBetween'])) {
@@ -122,6 +120,12 @@ function updatePlayer($conn, $id, $payload)
         $values[] = $payload["country"];
     }
 
+    if (isset($payload["teamId"])) {
+        $fields[] = "teamId = ?";
+        $types .= 'i';
+        $values[] = $payload["teamId"];
+    }
+
     if (empty($fields)) {
         http_response_code(400);
         echo json_encode(["status" => "error", "message" => "At lease one of username, dateOfBirth, country is required."]);
@@ -140,7 +144,12 @@ function updatePlayer($conn, $id, $payload)
     $stmt->bind_param($types, ...$values);
     $stmt->execute();
 
-    echo json_encode(["message" => "Player $id updated successfully"]);
+    if ($stmt->affected_rows == 0) {
+        echo json_encode(["status"=>"error", "message" => "Update player $id failed."]);
+        return;
+    }
+
+    echo json_encode(["status"=>"success", "message" => "Player $id updated successfully"]);
 }
 
 function deletePLayer($conn, $id)
@@ -152,6 +161,9 @@ function deletePLayer($conn, $id)
     }
     $stmt->bind_param("i", $id);
     $stmt->execute();
+    if ($stmt->affected_rows == 0) {
+        echo json_encode(["status"=>"error", "message" => "Delete player $id failed"]);
+    }
     echo json_encode(["message" => "Player deleted successfully"]);
 }
 
