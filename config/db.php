@@ -1,6 +1,6 @@
 <?php
 
-$hostname = "localhost";
+$hostname = "127.0.0.1";
 $user = "root";
 $password = "replace with you password";
 $database = "practicum";
