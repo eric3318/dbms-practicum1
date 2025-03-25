@@ -14,8 +14,9 @@ try {
     $action = isset($_GET["action"]) ? $_GET["action"] : null;
     
     if ($method === "GET" && $action === "top_with_achievements") {
-        getTopPlayersWithAchievements($conn);
-        return;
+        // Redirect to the achievements.php endpoint
+        header("Location: /api/analytics/achievements.php?action=top_players");
+        exit;
     }
     
     switch ($method) {
@@ -179,7 +180,7 @@ function updatePlayer($conn, $id, $payload)
  * This function handles the deletion of a player while relying on database foreign key constraints
  * to automatically remove related data in other tables (CASCADE DELETE).
  */
-function deletePLayer($conn, $id)
+function deletePlayer($conn, $id)
 {
     $sql = "DELETE FROM player WHERE id = ?";
     $stmt = $conn->prepare($sql);
