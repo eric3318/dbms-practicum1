@@ -3,6 +3,9 @@
 require_once __DIR__ . '/../config/db.php';
 
 header("Content-type: application/json; charset=utf-8");
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
 
 $method = $_SERVER["REQUEST_METHOD"];
 $path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
@@ -12,13 +15,13 @@ $input = file_get_contents("php://input");
 try {
     // Check for special action parameter
     $action = isset($_GET["action"]) ? $_GET["action"] : null;
-    
+
     if ($method === "GET" && $action === "top_with_achievements") {
         // Redirect to the achievements.php endpoint
         header("Location: /api/analytics/achievements.php?action=top_players");
         exit;
     }
-    
+
     switch ($method) {
         case "GET":
             $id = $segments[3];
@@ -66,7 +69,7 @@ function getPlayer($conn, $id)
 
 /**
  * Filtering & Ranking Query: Display the top 5 players with the highest scores dynamically.
- * 
+ *
  * This function allows filtering players based on various criteria such as type, date range, and age.
  */
 function getPlayers($conn, $params)
@@ -115,7 +118,7 @@ function getPlayers($conn, $params)
 
 /**
  * Update Operation: Allow users to modify player profile details through a web form.
- * 
+ *
  * This function handles updating player information like username, date of birth, country, and team.
  */
 function updatePlayer($conn, $id, $payload)
@@ -123,6 +126,12 @@ function updatePlayer($conn, $id, $payload)
     $fields = [];
     $types = '';
     $values = [];
+
+    if (isset($payload["age"])) {
+        $fields[] = "age = ?";
+        $types .= 'i';
+        $values[] = $payload["age"];
+    }
 
     if (isset($payload["username"])) {
         $fields[] = "username = ?";
@@ -134,6 +143,12 @@ function updatePlayer($conn, $id, $payload)
         $fields[] = "dateOfBirth = ?";
         $types .= 's';
         $values[] = $payload["dateOfBirth"];
+    }
+
+    if (isset($payload["age"])) {
+        $fields[] = "age = ?";
+        $types .= 'i';
+        $values[] = $payload["age"];
     }
 
     if (isset($payload["country"])) {
@@ -167,16 +182,16 @@ function updatePlayer($conn, $id, $payload)
     $stmt->execute();
 
     if ($stmt->affected_rows == 0) {
-        echo json_encode(["status"=>"error", "message" => "Update player $id failed."]);
+        echo json_encode(["status" => "error", "message" => "Update player $id failed."]);
         return;
     }
 
-    echo json_encode(["status"=>"success", "message" => "Player $id updated successfully"]);
+    echo json_encode(["status" => "success", "message" => "Player $id updated successfully"]);
 }
 
 /**
  * Delete Operation (Cascade on Delete): Ensure deleting a player removes related sessions and achievements automatically.
- * 
+ *
  * This function handles the deletion of a player while relying on database foreign key constraints
  * to automatically remove related data in other tables (CASCADE DELETE).
  */
@@ -190,7 +205,7 @@ function deletePlayer($conn, $id)
     $stmt->bind_param("i", $id);
     $stmt->execute();
     if ($stmt->affected_rows == 0) {
-        echo json_encode(["status"=>"error", "message" => "Delete player $id failed"]);
+        echo json_encode(["status" => "error", "message" => "Delete player $id failed"]);
     }
     echo json_encode(["message" => "Player deleted successfully"]);
 }

@@ -3,6 +3,8 @@
 require_once __DIR__ . '/../../config/db.php';
 
 header("Content-type: application/json; charset=utf-8");
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 
 $method = $_SERVER["REQUEST_METHOD"];
 $path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
@@ -100,10 +102,18 @@ function getTotalAchievementsEarnedPerGame($conn){
     ORDER BY totalAchievementsEarned DESC;
     ";
     $result = $conn->query($sql);
-    if ($result->num_rows > 0) {
-        $rows = $conn->fetchAll(MYSQLI_ASSOC);
-        echo json_encode($rows);
+
+    if (!$result) {
+        http_response_code(500);
+        echo json_encode(['error' => $conn->error]);
         return;
-     }
-    echo json_encode([]);
+    }
+
+    $rows = [];
+
+    while ($row = $result->fetch_assoc()) {
+        $rows[] = $row;
+    }
+
+    echo json_encode($rows);
 }
