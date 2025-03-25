@@ -2,7 +2,7 @@
 
 $hostname = "127.0.0.1";
 $user = "root";
-$password = "replace with you password";
+$password = ""; // Using empty password which is common for local MySQL installations
 $database = "practicum";
 
 $conn = new mysqli($hostname, $user, $password, $database);
