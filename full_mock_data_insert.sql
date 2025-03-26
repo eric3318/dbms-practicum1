@@ -1,20 +1,15 @@
 -- Insert users
-INSERT INTO users (id, username, password, email) VALUES 
-(1, 'admin_user', 'hashed_password_admin', 'admin@example.com'),
-(2, 'regular_user', 'hashed_password_user', 'user@example.com');
-
--- Assign roles to users
-INSERT INTO user_roles (user_id, role_id) VALUES 
-(1, 1), -- admin_user is assigned the admin role
-(2, 2); -- regular_user is assigned the user role
+INSERT INTO users (username, password) VALUES 
+('admin_user', 'hashed_password_admin'),
+('regular_user', 'hashed_password_user');
 
 -- Insert teams with created_by and updated_by
-INSERT INTO team (id, name, ranking, created_by, updated_by) VALUES 
-(1, 'Team 1', 45, 'admin_user', 'admin_user'),
-(2, 'Team 2', 20, 'admin_user', 'regular_user'),
-(3, 'Team 3', 20, 'regular_user', 'regular_user'),
-(4, 'Team 4', 11, 'admin_user', 'admin_user'),
-(5, 'Team 5', 45, 'regular_user', 'admin_user');
+INSERT INTO team (id, name, ranking, created_at, updated_at, created_by, updated_by) VALUES 
+(1, 'Team 1', 45, '2023-01-01 10:00:00', '2023-01-01 11:00:00', 'admin_user', 'admin_user'),
+(2, 'Team 2', 20, '2023-01-01 10:00:00', '2023-01-01 11:00:00', 'admin_user', 'regular_user'),
+(3, 'Team 3', 20, '2023-01-01 10:00:00', '2023-01-01 11:00:00', 'regular_user', 'regular_user'),
+(4, 'Team 4', 11, '2023-01-01 10:00:00', '2023-01-01 11:00:00', 'admin_user', 'admin_user'),
+(5, 'Team 5', 45, '2023-01-01 10:00:00', '2023-01-01 11:00:00', 'regular_user', 'admin_user');
 
 -- Insert players with created_by and updated_by
 INSERT INTO player (id, username, dateOfBirth, age, country, teamId, created_at, updated_at, created_by, updated_by) VALUES

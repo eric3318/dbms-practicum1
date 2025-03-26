@@ -173,27 +173,7 @@ CREATE TABLE item
 
 -- Create users table
 CREATE TABLE users (
-    id INT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL, -- For storing hashed passwords
-    email VARCHAR(100),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    PRIMARY KEY (username)
 );
-
--- Create roles table
-CREATE TABLE roles (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(50) UNIQUE NOT NULL
-);
-
--- Create user_roles junction table
-CREATE TABLE user_roles (
-    user_id INT,
-    role_id INT,
-    PRIMARY KEY (user_id, role_id),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
-);
-
--- Insert default roles
-INSERT INTO roles (name) VALUES ('admin'), ('user');
