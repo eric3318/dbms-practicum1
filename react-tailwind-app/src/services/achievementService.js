@@ -1,5 +1,5 @@
 export const getTotalAchievementsPerGame = async () => {
-  const res = await fetch('http://localhost/dbms-practicum1/api/analytics/achievements.php');
+  const res = await fetch('http://localhost/api/analytics/achievements.php');
   const text = await res.text();
   console.log("Achievements Raw:", text);
   
@@ -11,7 +11,7 @@ export const getTotalAchievementsPerGame = async () => {
 };
 
 export const getTopPlayersWithAchievements = async (limit = 5) => {
-  const res = await fetch(`http://localhost/dbms-practicum1/api/analytics/achievements.php?action=top_players&limit=${limit}`);
+  const res = await fetch(`http://localhost/api/analytics/achievements.php?action=top_players&limit=${limit}`);
 
   const text = await res.text(); // Handle raw response
   console.log('Top Players Response:', text);

@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost/dbms-practicum1/api/players.php";
+const BASE_URL = "http://localhost/api/player.php";
 
 // GET all players (join query for top players with achievements)
 export const getPlayers = async () => {

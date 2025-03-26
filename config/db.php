@@ -2,8 +2,8 @@
 
 $hostname = "127.0.0.1";
 $user = "root";
-$password = "";
-$database = "practicum";
+$password = "replace with your own";
+$database = "replace with your own";
 
 $conn = new mysqli($hostname, $user, $password, $database);
 

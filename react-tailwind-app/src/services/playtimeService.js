@@ -1,5 +1,5 @@
 export const getAveragePlayTimePerPlayer = async () => {
-  const res = await fetch('http://localhost/dbms-practicum1/api/analytics/playtime.php?type=average');
+  const res = await fetch('http://localhost/api/analytics/playtime.php?type=average');
   const text = await res.text();
   console.log("Average Playtime Raw:", text);
 
@@ -11,7 +11,7 @@ export const getAveragePlayTimePerPlayer = async () => {
 };
 
 export const getWeeklyPlayTimeByPlayer = async (startDate = '') => {
-  const url = new URL('http://localhost/dbms-practicum1/api/analytics/playtime.php');
+  const url = new URL('http://localhost/api/analytics/playtime.php');
   url.searchParams.append('type', 'total');
   if (startDate) {
     url.searchParams.append('start', startDate);
